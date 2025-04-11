@@ -6,12 +6,13 @@ import {
   UploadedFile,
   Body,
   UseFilters,
+  UsePipes,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { configSchema } from './schema';
-import { JoiValidationPipe } from './pipe';
-import { ValidationExceptionFilter } from './utils';
+import { createJoiValidationPipe } from './pipe';
+import { ValidationExceptionFilter } from './exceptionFilters';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -54,9 +55,10 @@ export class AppController {
     },
   })
   @UseInterceptors(FileInterceptor('file'))
+  @UsePipes(createJoiValidationPipe(configSchema))
   public async startCrawl(
     @UploadedFile() file: Express.Multer.File,
-    @Body(new JoiValidationPipe(configSchema)) config: any,
+    @Body() config: any,
   ) {
     // `config` is now the validated JSON object
     // Proceed with business logic
